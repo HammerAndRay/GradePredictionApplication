@@ -1,0 +1,57 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace CW2_OOD
+{
+    public partial class AddAssessment : Form
+    {
+        Module module;
+        Assessment assessment;
+
+        public AddAssessment(FormClosedEventHandler onClose, Module module, Assessment assessment = null)
+        {
+            this.module = module;
+            this.assessment = assessment;
+
+            InitializeComponent();
+
+            if (this.assessment != null)
+            {
+                this.AssessmentNameText.Text = assessment.getName();
+                this.AssessmentMarkNUD.Value = (decimal)assessment.getMark();
+                this.AssessmentWeightNUD.Value = (decimal)assessment.getWeight();
+            }
+
+            this.FormClosed += onClose;
+            this.Focus();
+        }
+
+        private void AssessmentSubmitButton_Click(object sender, EventArgs e)
+        {
+            string Name = AssessmentNameText.Text;
+            int Mark = (int)AssessmentMarkNUD.Value;
+            int Weight = (int)AssessmentWeightNUD.Value;
+            if(assessment == null)
+            {
+                module.addAssessment(Name, Mark, Weight);
+            }
+            else
+            {
+                assessment.setName(Name);
+                assessment.setMark(Mark);
+                assessment.setWeight(Weight);
+            }
+
+            this.Close();
+        }
+
+
+    }
+}

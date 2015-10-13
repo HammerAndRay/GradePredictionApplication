@@ -1,0 +1,65 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace CW2_OOD
+{
+    
+    public partial class ListAssessments : Form
+    {
+        Module module;
+        int curweight;
+
+        List<AssessmentControlGroup> acglist;
+
+        public ListAssessments(FormClosedEventHandler onClose, Module module)
+        {
+            this.module = module;
+            acglist = new List<AssessmentControlGroup>();
+            InitializeComponent();
+
+            update_panel();
+            this.FormClosed += onClose;
+            this.Focus();
+        }
+
+        public void update_panel()
+        {
+            EventHandler updateHandler = delegate(object sender, EventArgs args) { update_panel(); };
+            FormClosedEventHandler formClosedHandler = delegate(object sender, FormClosedEventArgs args) { update_panel(); };
+            Assessment[] assessments = module.getAssessments();
+
+            foreach(AssessmentControlGroup acg in acglist)
+            {
+                acg.removeControls();
+            }
+            acglist.Clear();
+
+            curweight = Module.sumAssessmentWeight(assessments);
+            Point cur = AssessmentsPanel.Location;
+            foreach(Assessment a in assessments)
+            {
+                AssessmentControlGroup acg = new AssessmentControlGroup(formClosedHandler, updateHandler, module, 100 - curweight, a, AssessmentsPanel);
+                acg.addControls(cur, out cur);
+                acglist.Add(acg);
+            }
+        }
+        private void AddAsse_Click(object sender, EventArgs e)
+        {
+            FormClosedEventHandler formClosedHandler = delegate(object s, FormClosedEventArgs a) { update_panel(); };
+            AddAssessment form = new AddAssessment(formClosedHandler, module, 100 - curweight);
+            form.Show();
+        }
+
+        private void CloseAsse_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+    }
+}

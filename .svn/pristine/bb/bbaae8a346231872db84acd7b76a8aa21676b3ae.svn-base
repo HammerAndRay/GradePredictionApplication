@@ -1,0 +1,72 @@
+using System;
+using System.Xml;
+
+namespace CW2_OOD
+{
+	public class Module
+	{
+		protected XmlDocument root;
+		protected XmlNode modulenode;
+		protected XmlNode nameattr;
+
+		public Module(XmlDocument root, XmlNode modulenode)
+		{
+			this.root = root;
+			this.modulenode = modulenode;
+			this.nameattr = this.modulenode.Attributes.GetNamedItem("name");
+		}
+
+        public XmlNode getNode()
+        {
+            return modulenode;
+        }
+
+		public void setName(string name)
+		{
+			nameattr.Value = name;
+		}
+
+		public string getName()
+		{
+			return nameattr.Value;
+		}
+
+		public Assessment[] getAssessments()
+		{
+			int assesscount;
+			Assessment[] assesslist;
+
+			assesscount = modulenode.ChildNodes.Count;
+			assesslist = new Assessment[assesscount];
+
+            for (int i = 0; i < assesscount; i++)
+            {
+                assesslist[i] = new Assessment(modulenode.ChildNodes[i]);
+            }
+            
+            return assesslist;
+		}
+
+		public Assessment addAssessment(string name, int mark, int weight)
+		{
+			Assessment assessment;
+			XmlNode assessmentnode = root.CreateElement("assessment");
+			assessmentnode.Attributes.Append(root.CreateAttribute("name"));
+			assessmentnode.Attributes.Append(root.CreateAttribute("mark"));
+            assessmentnode.Attributes.Append(root.CreateAttribute("weight"));
+			modulenode.AppendChild(assessmentnode);
+
+			assessment = new Assessment(assessmentnode);
+			assessment.setName(name);
+			assessment.setMark(mark);
+            assessment.setWeight(weight);
+
+			return assessment;
+		}
+
+        public void delAssessment(Assessment assessment)
+        {
+            modulenode.RemoveChild(assessment.getNode());
+        }
+	}
+}

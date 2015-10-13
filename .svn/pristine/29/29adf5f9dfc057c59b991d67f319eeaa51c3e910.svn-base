@@ -1,0 +1,55 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing;
+
+namespace CW2_OOD
+{
+    class ModuleControlGroup
+    {
+        public Label modLabel;
+        public Button modAssessments;
+        public Button modEdit;
+        public Button modDelete;
+
+        public Panel rootContainer;
+        public Module module;
+
+        public ModuleControlGroup(Panel root, Module m, Point point, out Point next)
+        {
+            this.module = m;
+
+            Point curpoint = new Point(point.X, point.Y);
+            modLabel = new Label();
+            modLabel.Width += 280;
+            modLabel.Text = module.getName();
+            modLabel.Location = curpoint;
+            curpoint = new Point(curpoint.X + modLabel.Width + 20, curpoint.Y);
+
+            modAssessments = new Button();
+            modAssessments.Text = "Assessments";
+            modAssessments.Location = curpoint;
+            curpoint = new Point(curpoint.X + modAssessments.Width + 20, curpoint.Y);
+
+            modEdit = new Button();
+            modEdit.Text = "Edit";
+            modEdit.Location = curpoint;
+            curpoint = new Point(curpoint.X + modEdit.Width + 20, curpoint.Y);
+
+            modDelete = new Button();
+            modDelete.Text = "Delete";
+            modDelete.Location = curpoint;
+            curpoint = new Point(curpoint.X + modDelete.Width + 20, curpoint.Y);
+
+            root.Controls.Add(modLabel);
+            root.Controls.Add(modAssessments);
+            root.Controls.Add(modEdit);
+            root.Controls.Add(modDelete);
+
+            next = new Point(point.X, point.Y + modAssessments.Height);
+        }
+    }
+}

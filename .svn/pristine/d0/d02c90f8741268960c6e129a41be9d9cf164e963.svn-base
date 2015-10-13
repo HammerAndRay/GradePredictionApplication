@@ -1,0 +1,64 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace CW2_OOD
+{
+    public partial class AddModule : Form
+    {
+        protected Course course;
+        protected Level level;
+        protected Module module;
+
+        public AddModule(Course course, Level level, Module module = null)
+        {
+            InitializeComponent();
+            this.course = course;
+            this.level = level;
+            this.module = module;
+        }
+
+        private void ModuleSaveButton_Click(object sender, EventArgs e)
+        {
+            String Code = ModuleCodeText.Text.Trim();
+            String Name = ModuleTitleText.Text.Trim();
+
+            if (Name.Equals("") || Code.Equals(""))
+            {
+                DialogResult Box = MessageBox.Show("Module Name/Code is empty.", "Error?",
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            int cred;
+            if (Credit15.Checked)
+            {
+                cred = 15;
+            }
+            else
+            {
+                cred = 30;
+            }
+
+            if (module == null)
+            {
+                module = course.addModule(level, Code + ": " + Name, cred);
+            }
+            else
+            {
+                module.setName(Code + ": " + Name);
+                module.setCredit(cred);
+            }
+            
+            //AssessmentF form = new AssessmentF();
+            this.Close();
+            //form.Show();
+        }
+    }
+}

@@ -1,0 +1,215 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml;
+
+namespace CW2_OOD
+{
+    public partial class MainPage : Form
+    {
+        const string filepath = "state.xml";
+        bool fileexists;
+        GPAState state;
+        Course course;
+
+        /* Small class containing all the elements and state information for the levels in use. */
+        class LevelGroup
+        {
+            public int credits;
+            public Level level;
+            public Panel tabpanel;
+            public List<ModuleControlGroup> levelControlGroups;
+
+            public LevelGroup(Level level, Panel tabpanel)
+            {
+                this.credits = 0;
+                this.level = level;
+                this.tabpanel = tabpanel;
+                this.levelControlGroups = new List<ModuleControlGroup>();
+            }
+        }
+
+        LevelGroup level4Group;
+        LevelGroup level5Group;
+        LevelGroup level6Group;
+
+
+        public MainPage()
+        {
+            state = new GPAState();
+            fileexists = state.load(filepath);
+            course = state.getCourse();
+
+            InitializeComponent();
+
+            level4Group = new LevelGroup(Level.LEVEL_4, Tab4ModulePanel);
+            level5Group = new LevelGroup(Level.LEVEL_5, Tab5ModulePanel);
+            level6Group = new LevelGroup(Level.LEVEL_6, Tab6ModulePanel);
+
+            tabControl1.Selected += new TabControlEventHandler(tabControl1_Selected);
+        }
+
+        void level4tab_updateOnClose(object sender, FormClosedEventArgs args)
+        {
+            tab_update(level4Group);
+        }
+
+        void level5tab_updateOnClose(object sender, FormClosedEventArgs args)
+        {
+            tab_update(level5Group);
+        }
+
+        void level6tab_updateOnClose(object sender, FormClosedEventArgs args)
+        {
+            tab_update(level6Group);
+        }
+
+        /* Method to update the tab pane contents. */
+        void tab_update(LevelGroup lg)
+        {
+            EventHandler updateHandler = delegate(object sender, EventArgs args) { tab_update(lg); };
+            FormClosedEventHandler formClosedHandler = delegate(object sender, FormClosedEventArgs args) { tab_update(lg); };
+            Module[] modlist = course.getModules(lg.level);
+
+            /* Remove controls... */
+            foreach (ModuleControlGroup mcg in lg.levelControlGroups)
+            {
+                mcg.removeControls();
+            }
+            lg.levelControlGroups.Clear();
+
+            lg.credits = Course.sumModuleCredit(modlist);
+            //Point cur = lg.tabpanel.Location;
+            Point cur = new Point(0, 0);
+            foreach(Module m in modlist)
+            {
+                ModuleControlGroup mcg = new ModuleControlGroup(formClosedHandler, updateHandler, course, lg.level, 120 - lg.credits, m, lg.tabpanel);
+                mcg.addControls(cur, out cur);
+                lg.levelControlGroups.Add(mcg);
+            }
+        }
+
+        private void BuildCourse_Click(object sender, EventArgs e)
+        {
+            if (!"".Equals(course.getName()))
+            {
+                Console.WriteLine("name set");
+
+                DialogResult Box = MessageBox.Show("Course Name Already set. \nDo you wish to change it?", "Override?",
+                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                if (Box != DialogResult.Yes)
+                {
+                    return;
+                }
+            }
+            AddCourse form = new AddCourse(course);
+            form.Show();
+        }
+
+        private void CourseNameSummary_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MainPage_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tabControl1_Selected(object sender, TabControlEventArgs e)
+        {
+            if (e.TabPage.Name == SummaryTab.Name)
+            {
+                CourseNameSummary.Text = "Course Name : " + course.getName();
+            }
+            if (e.TabPage.Name == Level4Tab.Name)
+            {
+                tab_update(level4Group);
+            }
+            if (e.TabPage.Name == Level5Tab.Name)
+            {
+                tab_update(level5Group);
+            }
+            if (e.TabPage.Name == Level6Tab.Name)
+            {
+                tab_update(level6Group);
+            }
+        }
+
+
+
+        private void StartTab_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void AddModuleLevel4Button_Click(object sender, EventArgs e)
+        {
+            if (course.getModuleCount(Level.LEVEL_4) < 8 && level4Group.credits < 120)
+            {
+                AddModule form = new AddModule(new FormClosedEventHandler(level4tab_updateOnClose), course, Level.LEVEL_4, 120 - level4Group.credits);
+                form.Show();
+            }
+            else
+            {
+                DialogResult Box = MessageBox.Show("Course/credit limit reached. \nDelete a module or change credits to continue.", "Limit",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void AddModuleLevel5Button_Click(object sender, EventArgs e)
+        {
+            if (course.getModuleCount(Level.LEVEL_5) < 8 && level5Group.credits < 120)
+            {
+                AddModule form = new AddModule(new FormClosedEventHandler(level5tab_updateOnClose), course, Level.LEVEL_5, 120 - level5Group.credits);
+                form.Show();
+            }
+            else
+            {
+                DialogResult Box = MessageBox.Show("Course/credit limit reached. \nDelete a module or change credits to continue.", "Limit",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void AddModuleLevel6Button_Click(object sender, EventArgs e)
+        {
+            if (course.getModuleCount(Level.LEVEL_6) < 8 && level6Group.credits < 120)
+            {
+                AddModule form = new AddModule(new FormClosedEventHandler(level6tab_updateOnClose), course, Level.LEVEL_6, 120 - level6Group.credits);
+                form.Show();
+            }
+            else
+            {
+                DialogResult Box = MessageBox.Show("Course/credit limit reached. \nDelete a module or change credits to continue.", "Limit",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void SaveButton_Click(object sender, EventArgs e)
+        {
+            
+            DialogResult Box = MessageBox.Show("Are you sure you want to save?", "Save",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (Box == DialogResult.Yes)
+            {
+                if(!state.save(filepath))
+                {
+                    /* error message */
+                }
+            }
+        }
+
+        private void Level4Tab_Click(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+

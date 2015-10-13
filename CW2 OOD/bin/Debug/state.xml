@@ -1,0 +1,18 @@
+<!DOCTYPE course[
+    <!ELEMENT course (level*) >
+    <!ATTLIST course name CDATA #REQUIRED >
+
+    <!ELEMENT level (module*) >
+    <!ATTLIST level level (4|5|6) #REQUIRED >
+
+    <!ELEMENT module (assessment*) >
+    <!ATTLIST module code CDATA #REQUIRED >
+    <!ATTLIST module name CDATA #REQUIRED >
+    <!ATTLIST module credit CDATA #REQUIRED >
+
+    <!ELEMENT assessment EMPTY >
+    <!ATTLIST assessment name CDATA #REQUIRED >
+    <!ATTLIST assessment mark CDATA "n/a" >
+    <!ATTLIST assessment weight CDATA "n/a" >
+]>
+<course name="Computer Science" />

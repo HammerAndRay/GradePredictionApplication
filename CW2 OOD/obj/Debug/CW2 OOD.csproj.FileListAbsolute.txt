@@ -1,0 +1,12 @@
+C:\Users\Rahim\Dropbox\Westminster\Year 2\Term 2\ECSE501 Object-Oriented Development\Cw2\Cw2 new\CW2 OOD\CW2 OOD\bin\Debug\CW2 OOD.exe.config
+C:\Users\Rahim\Dropbox\Westminster\Year 2\Term 2\ECSE501 Object-Oriented Development\Cw2\Cw2 new\CW2 OOD\CW2 OOD\bin\Debug\CW2 OOD.exe
+C:\Users\Rahim\Dropbox\Westminster\Year 2\Term 2\ECSE501 Object-Oriented Development\Cw2\Cw2 new\CW2 OOD\CW2 OOD\bin\Debug\CW2 OOD.pdb
+C:\Users\Rahim\Dropbox\Westminster\Year 2\Term 2\ECSE501 Object-Oriented Development\Cw2\Cw2 new\CW2 OOD\CW2 OOD\obj\Debug\CW2_OOD.AddAssessment.resources
+C:\Users\Rahim\Dropbox\Westminster\Year 2\Term 2\ECSE501 Object-Oriented Development\Cw2\Cw2 new\CW2 OOD\CW2 OOD\obj\Debug\CW2_OOD.ListAssessments.resources
+C:\Users\Rahim\Dropbox\Westminster\Year 2\Term 2\ECSE501 Object-Oriented Development\Cw2\Cw2 new\CW2 OOD\CW2 OOD\obj\Debug\CW2_OOD.AddCourse.resources
+C:\Users\Rahim\Dropbox\Westminster\Year 2\Term 2\ECSE501 Object-Oriented Development\Cw2\Cw2 new\CW2 OOD\CW2 OOD\obj\Debug\CW2_OOD.AddModule.resources
+C:\Users\Rahim\Dropbox\Westminster\Year 2\Term 2\ECSE501 Object-Oriented Development\Cw2\Cw2 new\CW2 OOD\CW2 OOD\obj\Debug\CW2_OOD.MainPage.resources
+C:\Users\Rahim\Dropbox\Westminster\Year 2\Term 2\ECSE501 Object-Oriented Development\Cw2\Cw2 new\CW2 OOD\CW2 OOD\obj\Debug\CW2_OOD.Properties.Resources.resources
+C:\Users\Rahim\Dropbox\Westminster\Year 2\Term 2\ECSE501 Object-Oriented Development\Cw2\Cw2 new\CW2 OOD\CW2 OOD\obj\Debug\CW2 OOD.csproj.GenerateResource.Cache
+C:\Users\Rahim\Dropbox\Westminster\Year 2\Term 2\ECSE501 Object-Oriented Development\Cw2\Cw2 new\CW2 OOD\CW2 OOD\obj\Debug\CW2 OOD.exe
+C:\Users\Rahim\Dropbox\Westminster\Year 2\Term 2\ECSE501 Object-Oriented Development\Cw2\Cw2 new\CW2 OOD\CW2 OOD\obj\Debug\CW2 OOD.pdb

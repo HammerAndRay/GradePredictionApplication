@@ -1,0 +1,98 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml;
+
+namespace CW2_OOD
+{
+    public partial class MainPage : Form
+    {
+        const string filepath = "state.xml";
+        bool fileexists;
+        GPAState state;
+        Course course;
+        public MainPage()
+        {
+            state = new GPAState();
+            fileexists = state.load(filepath);
+            course = state.getCourse();
+
+            InitializeComponent();
+            tabControl1.Selected += new TabControlEventHandler(tabControl1_Selected);
+        }
+
+        private void BuildCourse_Click(object sender, EventArgs e)
+        {
+            if (! "".Equals(course.getName()))
+            {
+                Console.WriteLine("name set");
+
+                DialogResult Box = MessageBox.Show("Course Name Already set. \nDo you wish to change it?", "Override?",
+                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                if (Box == DialogResult.Yes)
+                {
+                    AddCourse form = new AddCourse(course);
+                    form.Show();
+                }
+                else if (Box == DialogResult.No)
+                {
+
+                }
+                else if (Box == DialogResult.Cancel)
+                {
+
+                }
+            }
+            else
+            {
+                AddCourse form = new AddCourse(course);
+                form.Show();
+            }
+
+            state.save(filepath);
+        }
+
+        private void CourseNameSummary_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MainPage_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tabControl1_Selected(object sender, TabControlEventArgs e)
+        {
+            if (e.TabPage.Name == SummaryTab.Name)
+            {
+                CourseNameSummary.Text = "Course Name : " + course.getName();
+            }
+            if (e.TabPage.Name == Level4Tab.Name)
+            {
+                
+            }
+        }
+
+
+
+        private void StartTab_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void AddModuleLevel4Button_Click(object sender, EventArgs e)
+        {
+            AddModule form = new AddModule();
+            form.Show();
+        }
+    }
+}
+

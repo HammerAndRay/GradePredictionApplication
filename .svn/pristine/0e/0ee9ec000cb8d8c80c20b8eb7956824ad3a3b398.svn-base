@@ -1,0 +1,47 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing;
+
+namespace CW2_OOD
+{
+    class AssessmentControlGroup
+    {
+        public Label asseLabel;
+        public TextBox asseName;
+        public TextBox asseMark;
+        public TextBox asseWeight;
+
+        public Panel rootContainer;
+        public Assessment assessment;
+
+        public AssessmentControlGroup(Panel root, Assessment a, Point point)
+        {
+            Point curpoint = new Point(point.X, point.Y);
+            asseLabel = new Label();
+            asseLabel.Location = curpoint;
+            curpoint = new Point(curpoint.X + asseLabel.Width, curpoint.Y);
+
+            asseName = new TextBox();
+            asseName.Location = curpoint;
+            curpoint = new Point(curpoint.X + asseName.Width, curpoint.Y);
+
+            asseMark = new TextBox();
+            asseMark.Location = curpoint;
+            curpoint = new Point(curpoint.X + asseMark.Width, curpoint.Y);
+
+            asseWeight = new TextBox();
+            asseWeight.Location = curpoint;
+            curpoint = new Point(curpoint.X + asseWeight.Width, curpoint.Y);
+
+
+            root.Controls.Add(asseLabel);
+            root.Controls.Add(asseName);
+            root.Controls.Add(asseMark);
+            root.Controls.Add(asseWeight);
+        }
+    }
+}

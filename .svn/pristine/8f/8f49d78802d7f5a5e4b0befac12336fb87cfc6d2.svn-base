@@ -1,0 +1,160 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml;
+
+namespace CW2_OOD
+{
+    public partial class MainPage : Form
+    {
+        const string filepath = "state.xml";
+        bool fileexists;
+        GPAState state;
+        Course course;
+
+        List<ModuleControlGroup> tab4ControlGroups = null;
+        List<ModuleControlGroup> tab5ControlGroups = null;
+        List<ModuleControlGroup> tab6ControlGroups = null;
+
+
+        public MainPage()
+        {
+            state = new GPAState();
+            fileexists = state.load(filepath);
+            course = state.getCourse();
+
+            InitializeComponent();
+            tabControl1.Selected += new TabControlEventHandler(tabControl1_Selected);
+        }
+
+        void level4tab_updateOnClose(object sender, FormClosedEventArgs args)
+        {
+            level4tab_update();
+        }
+
+        /* Methods to update the tab pane contents. */
+        void level4tab_update()
+        {
+
+            Module[] modlist = course.getModules(Level.LEVEL_4);
+
+            if(tab4ControlGroups != null)
+            {
+                /* Remove controls... */
+            }
+
+            tab4ControlGroups = new List<ModuleControlGroup>();
+
+            Point cur = Tab4ModulePanel.Location;
+            foreach(Module m in modlist)
+            {
+                tab4ControlGroups.Add(new ModuleControlGroup(Tab4ModulePanel, m, cur, out cur));
+            }
+            
+        }
+
+        private void BuildCourse_Click(object sender, EventArgs e)
+        {
+            if (! "".Equals(course.getName()))
+            {
+                Console.WriteLine("name set");
+
+                DialogResult Box = MessageBox.Show("Course Name Already set. \nDo you wish to change it?", "Override?",
+                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                if (Box == DialogResult.Yes)
+                {
+                    AddCourse form = new AddCourse(course);
+                    form.Show();
+                }
+                else if (Box == DialogResult.No)
+                {
+
+                }
+                else if (Box == DialogResult.Cancel)
+                {
+
+                }
+            }
+            else
+            {
+                AddCourse form = new AddCourse(course);
+                form.Show();
+            }
+        }
+
+        private void CourseNameSummary_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MainPage_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tabControl1_Selected(object sender, TabControlEventArgs e)
+        {
+            if (e.TabPage.Name == SummaryTab.Name)
+            {
+                CourseNameSummary.Text = "Course Name : " + course.getName();
+            }
+            if (e.TabPage.Name == Level4Tab.Name)
+            {
+                level4tab_update();
+            }
+        }
+
+
+
+        private void StartTab_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void AddModuleLevel4Button_Click(object sender, EventArgs e)
+        {
+            AddModule form = new AddModule(course, Level.LEVEL_4);
+            form.FormClosed += new FormClosedEventHandler(level4tab_updateOnClose);
+            form.Show();
+        }
+
+        private void AddModuleLevel5Button_Click(object sender, EventArgs e)
+        {
+            AddModule form = new AddModule(course, Level.LEVEL_5);
+            form.Show();
+        }
+
+        private void AddModuleLevel6Button_Click(object sender, EventArgs e)
+        {
+            AddModule form = new AddModule(course, Level.LEVEL_6);
+            form.Show();
+        }
+
+        private void SaveButton_Click(object sender, EventArgs e)
+        {
+            
+            DialogResult Box = MessageBox.Show("Are you sure you want to save?", "Save",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (Box == DialogResult.Yes)
+            {
+                if(!state.save(filepath))
+                {
+                    /* error message */
+                }
+            }
+        }
+
+        private void Level4Tab_Click(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+

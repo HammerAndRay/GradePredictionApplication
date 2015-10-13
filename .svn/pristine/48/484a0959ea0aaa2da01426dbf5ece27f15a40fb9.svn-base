@@ -1,0 +1,105 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml;
+
+namespace CW2_OOD
+{
+    public partial class MainPage : Form
+    {
+        public MainPage()
+        {
+            InitializeComponent();
+            tabControl1.Selected += new TabControlEventHandler(tabControl1_Selected);
+        }
+
+
+        private void BuildCourse_Click(object sender, EventArgs e)
+        {
+            if (File.Exists("CourseName.xml"))
+            {
+                Console.WriteLine("file exists");
+
+                DialogResult Box = MessageBox.Show("Course Name Already set. \nDo you wish to override?", "Override?",
+                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                if (Box == DialogResult.Yes)
+                {
+                    AddCourse form = new AddCourse();
+                    form.Show();
+                }
+                else if (Box == DialogResult.No)
+                {
+
+                }
+                else if (Box == DialogResult.Cancel)
+                {
+
+                }
+            }
+            else
+            {
+                AddCourse form = new AddCourse();
+                form.Show();
+            }
+
+        }
+
+        private void CourseNameSummary_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MainPage_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tabControl1_Selected(object sender, TabControlEventArgs e)
+        {
+            if (e.TabPage.Name == SummaryTab.Name)
+            {
+                string line;
+                System.IO.StreamReader file = new System.IO.StreamReader("CourseName.xml");
+                while ((line = file.ReadLine()) != null)
+                {
+                    Console.WriteLine(line);
+                    CourseNameSummary.Text = "Course Name : " + line;
+                }
+
+                file.Close();
+
+            }
+            if (e.TabPage.Name == Level4Tab.Name)
+            {
+                try
+                {
+                    XmlReader xmlFile = XmlReader.Create("ModuleLevel4.xml", new XmlReaderSettings());
+                    DataSet dataSet = new DataSet();
+                    //Read xml to dataset
+                    dataSet.ReadXml(xmlFile);
+                    //Pass empdetails table to datagridview datasource
+                    dataGridView1.DataSource = dataSet.Tables["Content"];
+                    //Close xml reader
+                    xmlFile.Close();
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("error");
+                }
+            }
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+    }
+}
+

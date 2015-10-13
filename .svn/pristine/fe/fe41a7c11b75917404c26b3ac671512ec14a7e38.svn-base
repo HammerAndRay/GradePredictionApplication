@@ -1,0 +1,112 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing;
+
+namespace CW2_OOD
+{
+    class AssessmentControlGroup
+    {
+        public Label assessName;
+        public Label assessMark;
+        public Label assessWeight;
+        public Label assessStatus;
+        public Button assessEdit;
+        public Button assessDelete;
+
+        public Panel root;
+        public Module module;
+        public Assessment assessment;
+
+        public int maxweight;
+
+        public FormClosedEventHandler updateFCEH;
+        public EventHandler updateEH;
+
+        public AssessmentControlGroup(FormClosedEventHandler updateFCEH, EventHandler updateEH, Module module, int maxweight, Assessment assessment, Panel root)
+        {
+            this.root = root;
+            this.module = module;
+            this.assessment = assessment;
+            this.maxweight = maxweight;
+
+            this.updateFCEH = updateFCEH;
+            this.updateEH = updateEH;
+
+            assessName = new Label();
+            assessMark = new Label();
+            assessWeight = new Label();
+            assessStatus = new Label();
+            assessEdit = new Button();
+            assessDelete = new Button();
+        }
+
+        public void addControls(Point point, out Point next)
+        {
+            Point curpoint = new Point(point.X, point.Y);
+            assessName.Width += 40;
+            assessName.Text = "Name: " + assessment.getName();
+            assessName.Location = curpoint;
+            curpoint = new Point(curpoint.X + assessName.Width + 5, curpoint.Y);
+
+            assessMark.Width -= 30;
+            assessMark.Text = "Mark: " + assessment.getMark() + "%";
+            assessMark.Location = curpoint;
+            curpoint = new Point(curpoint.X + assessMark.Width + 5, curpoint.Y);
+
+            assessWeight.Width -= 20;
+            assessWeight.Text = "Weight: " + assessment.getWeight() + "%";
+            assessWeight.Location = curpoint;
+            curpoint = new Point(curpoint.X + assessWeight.Width + 5, curpoint.Y);
+
+            assessEdit.Text = "Edit";
+            assessEdit.Location = curpoint;
+            assessEdit.Click += new EventHandler(assessmentEdit_Click);
+            curpoint = new Point(curpoint.X + assessEdit.Width + 5, curpoint.Y);
+
+            assessDelete.Text = "Delete";
+            assessDelete.Location = curpoint;
+            assessDelete.Click += new EventHandler(assessmentDelete_Click);
+            assessDelete.Click += updateEH;
+            curpoint = new Point(curpoint.X + assessDelete.Width + 5, curpoint.Y);
+
+            assessStatus.Width -= 25;
+            assessStatus.Text = "Status: " + (assessment.getMark() >= 30 ? "pass" : "fail");
+            assessStatus.Location = curpoint;
+            curpoint = new Point(curpoint.X + assessStatus.Width + 5, curpoint.Y);
+
+            root.Controls.Add(assessName);
+            root.Controls.Add(assessMark);
+            root.Controls.Add(assessWeight);
+            root.Controls.Add(assessEdit);
+            root.Controls.Add(assessDelete);
+            root.Controls.Add(assessStatus);
+
+            next = new Point(point.X, point.Y + assessEdit.Height);
+        }
+
+        public void removeControls()
+        {
+            root.Controls.Remove(assessName);
+            root.Controls.Remove(assessMark);
+            root.Controls.Remove(assessWeight);
+            root.Controls.Remove(assessEdit);
+            root.Controls.Remove(assessDelete);
+            root.Controls.Remove(assessStatus);
+        }
+
+        public void assessmentEdit_Click(object sender, EventArgs args)
+        {
+            AddAssessment form = new AddAssessment(updateFCEH, module, maxweight, assessment);
+            form.Show();
+        }
+
+        public void assessmentDelete_Click(object sender, EventArgs args)
+        {
+            module.delAssessment(assessment);
+        }
+    }
+}

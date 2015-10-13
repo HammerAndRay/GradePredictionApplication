@@ -1,0 +1,494 @@
+﻿﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml;
+
+namespace CW2_OOD
+{
+    public partial class MainPage : Form
+    {
+        const string filepath = "state.xml";
+        bool fileexists;
+        GPAState state;
+        Course course;
+
+        /* Small class containing all the elements and state information for the levels in use. */
+        class LevelGroup
+        {
+            public int credits;
+            public Level level;
+            public Panel tabpanel;
+            public List<ModuleControlGroup> levelControlGroups;
+
+            public LevelGroup(Level level, Panel tabpanel)
+            {
+                this.credits = 0;
+                this.level = level;
+                this.tabpanel = tabpanel;
+                this.levelControlGroups = new List<ModuleControlGroup>();
+            }
+        }
+
+        LevelGroup level4Group;
+        LevelGroup level5Group;
+        LevelGroup level6Group;
+        List<SummaryModuleGroup> level4SummaryGroups;
+        List<SummaryModuleGroup> level5SummaryGroups;
+        List<SummaryModuleGroup> level6SummaryGroups;
+
+
+        public MainPage()
+        {
+            state = new GPAState();
+            fileexists = state.load(filepath);
+            course = state.getCourse();
+
+            InitializeComponent();
+
+            level4Group = new LevelGroup(Level.LEVEL_4, Tab4ModulePanel);
+            level5Group = new LevelGroup(Level.LEVEL_5, Tab5ModulePanel);
+            level6Group = new LevelGroup(Level.LEVEL_6, Tab6ModulePanel);
+
+
+            level4SummaryGroups = new List<SummaryModuleGroup>();
+            level5SummaryGroups = new List<SummaryModuleGroup>();
+            level6SummaryGroups = new List<SummaryModuleGroup>();
+
+            tabControl1.Selected += new TabControlEventHandler(tabControl1_Selected);
+        }
+
+        void level4tab_updateOnClose(object sender, FormClosedEventArgs args)
+        {
+            tab_update(level4Group);
+        }
+
+        void level5tab_updateOnClose(object sender, FormClosedEventArgs args)
+        {
+            tab_update(level5Group);
+        }
+
+        void level6tab_updateOnClose(object sender, FormClosedEventArgs args)
+        {
+            tab_update(level6Group);
+        }
+
+        /* Method to update the tab pane contents. */
+        void tab_update(LevelGroup lg)
+        {
+            EventHandler updateHandler = delegate(object sender, EventArgs args) { tab_update(lg); };
+            FormClosedEventHandler formClosedHandler = delegate(object sender, FormClosedEventArgs args) { tab_update(lg); };
+            Module[] modlist = course.getModules(lg.level);
+
+            /* Remove controls... */
+            foreach (ModuleControlGroup mcg in lg.levelControlGroups)
+            {
+                mcg.removeControls();
+            }
+            lg.levelControlGroups.Clear();
+
+            lg.credits = Course.sumModuleCredit(modlist);
+            //Point cur = lg.tabpanel.Location;
+            Point cur = new Point(0, 0);
+            foreach(Module m in modlist)
+            {
+                ModuleControlGroup mcg = new ModuleControlGroup(formClosedHandler, updateHandler, course, lg.level, 120 - lg.credits, m, lg.tabpanel);
+                mcg.addControls(cur, out cur);
+                lg.levelControlGroups.Add(mcg);
+            }
+        }
+
+        void summary_update()
+        {
+            bool temp;
+            Point cur;
+
+            double level4avg = 0.0;
+            bool level4pass = true;
+            double level5avg = 0.0;
+            bool level5pass = true;
+            double level6avg = 0.0;
+            bool level6pass = true;
+            int a = 0;
+            int b = 0;
+            
+            List<double> level5sorted = new List<double>();
+            List<double> level6sorted = new List<double>();
+
+            foreach (SummaryModuleGroup smg in level4SummaryGroups)
+            {
+                smg.removeControls();
+            }
+            level4SummaryGroups.Clear();
+
+            Module[] level4modules = course.getModules(Level.LEVEL_4);
+            cur = new Point(0, 0);
+            foreach (Module mod in level4modules)
+            {
+                SummaryModuleGroup smg = new SummaryModuleGroup(Level.LEVEL_4, mod, level4sum);
+                smg.addControls(cur, out cur);
+                level4SummaryGroups.Add(smg);
+                level4avg += mod.score(out temp) * (double)mod.getCredit();
+                level4pass = level4pass && !temp;
+
+            }
+            level4avg /= (double)Course.sumModuleCredit(level4modules);
+            if (level4modules.Count() < 1)
+            {
+                level4avg = 0;
+            }
+            
+            marklevel4.Text = "Calculated Average : " + Math.Round(level4avg, 2) + "%";
+            passfail4.Text = level4pass ? "Pass" : "Fail";
+
+            foreach (SummaryModuleGroup smg in level5SummaryGroups)
+            {
+                smg.removeControls();
+            }
+            level5SummaryGroups.Clear();
+
+            Module[] level5modules = course.getModules(Level.LEVEL_5);
+            cur = new Point(0, 0);
+            foreach (Module mod in level5modules)
+            {
+                SummaryModuleGroup smg = new SummaryModuleGroup(Level.LEVEL_5, mod, level5sum);
+                smg.addControls(cur, out cur);
+                level5SummaryGroups.Add(smg);
+
+                double scr = mod.score(out temp);
+                int cred = mod.getCredit();
+                level5avg += scr * (double)cred;
+                level5pass = level5pass && !temp;
+
+                
+                if(cred == 30)
+                {
+                    level5sorted.Add(scr);
+                }
+                level5sorted.Add(scr);
+            }
+
+            foreach (SummaryModuleGroup smg in level6SummaryGroups)
+            {
+                smg.removeControls();
+            }
+            level6SummaryGroups.Clear();
+
+            Module[] level6modules = course.getModules(Level.LEVEL_6);
+            cur = new Point(0, 0);
+            foreach (Module mod in level6modules)
+            {
+                SummaryModuleGroup smg = new SummaryModuleGroup(Level.LEVEL_6, mod, level6sum);
+                smg.addControls(cur, out cur);
+                level6SummaryGroups.Add(smg);
+
+                double scr = mod.score(out temp);
+                int cred = mod.getCredit();
+                level6avg += scr * (double)cred;
+                level6pass = level6pass && !temp;
+                
+                if(cred == 30)
+                {
+                    level6sorted.Add(scr);
+                }
+                level6sorted.Add(scr);
+            }
+
+            if (level6sorted.Count() < 1)
+            {
+                Awardlabel.Text = "Degree Award : Insufficient Data";
+
+                level6avg = 0;
+                level5avg /= (double)Course.sumModuleCredit(level5modules);
+            }
+            else
+            {
+                if (level5sorted.Count() < 1)
+                {               
+                    level5avg = 0;         
+                }
+                
+
+                level6sorted.Sort();
+                level5sorted.Add(level6sorted[0]);
+                if (level6sorted.Count() > 1)
+                {
+                    level6sorted.RemoveAt(0);
+                }
+
+                level6avg = level6sorted.Average();
+                level5sorted.Sort();
+                if (level5sorted.Count() > 1)
+                {
+                level5sorted.RemoveAt(0);
+                }
+                level5avg = level5sorted.Average();
+
+                if (level6avg >= 70.0)
+                {
+                    a = 1;
+                }
+                else if (level6avg >= 60.0)
+                {
+                    a = 2;
+                }
+                else if (level6avg >= 50.0)
+                {
+                    a = 3;
+                }
+                else if (level6avg <= 50.0)
+                {
+                    a = 4;
+                }
+                /* split */
+                if (level5avg >= 60.0)
+                {
+                    b = 1;
+                }
+                else if (level5avg >= 50.0)
+                {
+                    b = 2;
+                }
+                else if (level5avg >= 40.0)
+                {
+                    b = 3;
+                }
+                else if (level5avg <= 40.0)
+                {
+                    b = 4;
+                }
+
+                switch(Math.Max(a, b))
+                    {
+                    case 1:
+                        Awardlabel.Text = "Degree Award : First";
+                        break;
+                    case 2:
+                        Awardlabel.Text = "Degree Award : Upper Second";
+                        break;
+                    case 3:
+                        Awardlabel.Text = "Degree Award : Lower Second";
+                        break;
+                    default:
+                        if ((level5avg + level6avg) / 2.0 >= 40.0)
+                        {
+                            Awardlabel.Text = "Degree Award : Third";
+                        }
+                        else
+                        {
+                            Awardlabel.Text = "Degree Award : Fail";
+                        }
+                        break;
+                }
+            }
+            
+
+            marklevel6.Text = "Calculated Average : " + Math.Round(level6avg, 2) + "%";
+            passfail6.Text = level6pass ? "Pass" : "Fail";
+
+            marklevel5.Text = "Calculated Average : " + Math.Round(level5avg, 2) + "%";
+            passfail5.Text = level5pass ? "Pass" : "Fail";
+
+        }
+
+
+        private void BuildCourse_Click(object sender, EventArgs e)
+        {
+            if (!"".Equals(course.getName()))
+            {
+                Console.WriteLine("name set");
+
+                DialogResult Box = MessageBox.Show("Course Name Already set. \nDo you wish to change it?", "Override?",
+                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                if (Box != DialogResult.Yes)
+                {
+                    return;
+                }
+            }
+            AddCourse form = new AddCourse(course);
+            form.Show();
+        }
+
+        private void CourseNameSummary_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MainPage_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tabControl1_Selected(object sender, TabControlEventArgs e)
+        {
+            if (e.TabPage.Name == SummaryTab.Name)
+            {
+                CourseNameSummary.Text = "Course Name : " + course.getName();
+            }
+            if (e.TabPage.Name == Level4Tab.Name)
+            {
+                tab_update(level4Group);
+            }
+            if (e.TabPage.Name == Level5Tab.Name)
+            {
+                tab_update(level5Group);
+            }
+            if (e.TabPage.Name == Level6Tab.Name)
+            {
+                tab_update(level6Group);
+            }
+            if (e.TabPage.Name == SummaryTab.Name)
+            {
+                summary_update();
+            }
+        }
+
+
+
+        private void StartTab_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void AddModuleLevel4Button_Click(object sender, EventArgs e)
+        {
+            if (course.getModuleCount(Level.LEVEL_4) < 8 && level4Group.credits < 120)
+            {
+                AddModule form = new AddModule(new FormClosedEventHandler(level4tab_updateOnClose), course, Level.LEVEL_4, 120 - level4Group.credits);
+                form.Show();
+            }
+            else
+            {
+                DialogResult Box = MessageBox.Show("Course/credit limit reached. \nDelete a module or change credits to continue.", "Limit",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void AddModuleLevel5Button_Click(object sender, EventArgs e)
+        {
+            if (course.getModuleCount(Level.LEVEL_5) < 8 && level5Group.credits < 120)
+            {
+                AddModule form = new AddModule(new FormClosedEventHandler(level5tab_updateOnClose), course, Level.LEVEL_5, 120 - level5Group.credits);
+                form.Show();
+            }
+            else
+            {
+                DialogResult Box = MessageBox.Show("Course/credit limit reached. \nDelete a module or change credits to continue.", "Limit",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void AddModuleLevel6Button_Click(object sender, EventArgs e)
+        {
+            if (course.getModuleCount(Level.LEVEL_6) < 8 && level6Group.credits < 120)
+            {
+                AddModule form = new AddModule(new FormClosedEventHandler(level6tab_updateOnClose), course, Level.LEVEL_6, 120 - level6Group.credits);
+                form.Show();
+            }
+            else
+            {
+                DialogResult Box = MessageBox.Show("Course/credit limit reached. \nDelete a module or change credits to continue.", "Limit",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void SaveButton_Click(object sender, EventArgs e)
+        {
+
+
+            DialogResult Box = MessageBox.Show("Are you sure you want to save?", "Save",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (Box == DialogResult.Yes)
+            {
+				/* Boxed boolean */
+				Object retval = false;
+
+				/* Create a new delegate to handle file IO. */
+				ThreadStart savefunc = delegate()
+				{
+					lock(retval)
+					{
+						retval = state.save(filepath);
+					}
+
+					/* Simulate delay. */
+					//Thread.Sleep(3000);
+				};
+
+				Thread savethread = new Thread (savefunc);
+				savethread.Start ();
+
+				/* This spinlock would be used if we were doing anything else while saving. */
+				//while (savethread.IsAlive)
+				//{
+				//	/* Spin on it. */
+				//}
+
+				savethread.Join();
+
+				if (!(bool)retval)
+				{
+					/* error message */
+				}
+            }
+        }
+
+        private void Level4Tab_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Awardlabel_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void passfail6_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void passfail4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void passfail5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void SummaryTab_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void marklevel6_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void marklevel5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void marklevel4_Click(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+

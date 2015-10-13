@@ -1,0 +1,159 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml;
+
+namespace CW2_OOD
+{
+    public partial class MainPage : Form
+    {
+        const string filepath = "state.xml";
+        bool fileexists;
+        GPAState state;
+        Course course;
+
+        List<ModuleControlGroup> tab4ControlGroups = new List<ModuleControlGroup>();
+        List<ModuleControlGroup> tab5ControlGroups = new List<ModuleControlGroup>();
+        List<ModuleControlGroup> tab6ControlGroups = new List<ModuleControlGroup>();
+
+
+        public MainPage()
+        {
+            state = new GPAState();
+            fileexists = state.load(filepath);
+            course = state.getCourse();
+
+            InitializeComponent();
+            tabControl1.Selected += new TabControlEventHandler(tabControl1_Selected);
+        }
+
+        void level4tab_updateOnClose(object sender, FormClosedEventArgs args)
+        {
+            tab_update(Level.LEVEL_4, ref tab4ControlGroups, Tab4ModulePanel);
+        }
+
+        void level5tab_updateOnClose(object sender, FormClosedEventArgs args)
+        {
+            tab_update(Level.LEVEL_5, ref tab5ControlGroups, Tab5ModulePanel);
+        }
+
+        void level6tab_updateOnClose(object sender, FormClosedEventArgs args)
+        {
+            tab_update(Level.LEVEL_6, ref tab6ControlGroups, Tab6ModulePanel);
+        }
+
+        /* Method to update the tab pane contents. */
+        void tab_update(Level level, ref List<ModuleControlGroup> tablist, Panel tabpanel)
+        {
+
+            Module[] modlist = course.getModules(level);
+
+            /* Remove controls... */
+            foreach(ModuleControlGroup mcg in tablist)
+            {
+                mcg.removeControls();
+            }
+            tablist.Clear();
+
+            Point cur = tabpanel.Location;
+            foreach(Module m in modlist)
+            {
+                tablist.Add(new ModuleControlGroup(Tab4ModulePanel, m, cur, out cur));
+            }
+        }
+
+        private void BuildCourse_Click(object sender, EventArgs e)
+        {
+            if (!"".Equals(course.getName()))
+            {
+                Console.WriteLine("name set");
+
+                DialogResult Box = MessageBox.Show("Course Name Already set. \nDo you wish to change it?", "Override?",
+                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                if (Box != DialogResult.Yes)
+                {
+                    return;
+                }
+            }
+            AddCourse form = new AddCourse(course);
+            form.Show();
+        }
+
+        private void CourseNameSummary_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MainPage_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tabControl1_Selected(object sender, TabControlEventArgs e)
+        {
+            if (e.TabPage.Name == SummaryTab.Name)
+            {
+                CourseNameSummary.Text = "Course Name : " + course.getName();
+            }
+            if (e.TabPage.Name == Level4Tab.Name)
+            {
+                tab_update(Level.LEVEL_4, ref tab4ControlGroups, Tab4ModulePanel);
+            }
+        }
+
+
+
+        private void StartTab_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void AddModuleLevel4Button_Click(object sender, EventArgs e)
+        {
+            AddModule form = new AddModule(course, Level.LEVEL_4);
+            form.FormClosed += new FormClosedEventHandler(level4tab_updateOnClose);
+            form.Show();
+        }
+
+        private void AddModuleLevel5Button_Click(object sender, EventArgs e)
+        {
+            AddModule form = new AddModule(course, Level.LEVEL_5);
+            form.FormClosed += new FormClosedEventHandler(level5tab_updateOnClose);
+            form.Show();
+        }
+
+        private void AddModuleLevel6Button_Click(object sender, EventArgs e)
+        {
+            AddModule form = new AddModule(course, Level.LEVEL_6);
+            form.FormClosed += new FormClosedEventHandler(level6tab_updateOnClose);
+            form.Show();
+        }
+
+        private void SaveButton_Click(object sender, EventArgs e)
+        {
+            
+            DialogResult Box = MessageBox.Show("Are you sure you want to save?", "Save",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (Box == DialogResult.Yes)
+            {
+                if(!state.save(filepath))
+                {
+                    /* error message */
+                }
+            }
+        }
+
+        private void Level4Tab_Click(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+

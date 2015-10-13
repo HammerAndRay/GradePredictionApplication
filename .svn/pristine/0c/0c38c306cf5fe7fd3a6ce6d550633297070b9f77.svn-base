@@ -1,0 +1,78 @@
+using System;
+using System.Xml;
+
+namespace CW2_OOD
+{
+	public class Module
+	{
+		protected XmlDocument root;
+		protected XmlNode modulenode;
+		protected XmlNode nameattr;
+
+		public Module(XmlDocument root, XmlNode modulenode)
+		{
+			this.root = root;
+			this.modulenode = modulenode;
+			this.nameattr = this.modulenode.Attributes.GetNamedItem("name");
+		}
+
+		public void setName(string name)
+		{
+			nameattr.Value = name;
+		}
+
+		public string getName()
+		{
+			return nameattr.Value;
+		}
+
+		public string[] getAssessmentNameList()
+		{
+			int assesscount;
+			string[] assesslist;
+
+			assesscount = modulenode.ChildNodes.Count;
+			assesslist = new string[assesscount];
+
+			for (int i = 0; i < assesscount; i++)
+			{
+				assesslist[i] = modulenode.ChildNodes[i].Attributes.GetNamedItem("name").Value;
+			}
+
+			return assesslist;
+		}
+
+		public Assessment getAssessment(int index)
+		{
+			if(index < modulenode.ChildNodes.Count)
+			{
+				return new Assessment(modulenode.ChildNodes[index]);
+			}
+			else
+			{
+				/* index was out of range. */
+				throw new NonexistantEntityException();
+			}
+		}
+
+		public Assessment addAssessment(string name, int mark)
+		{
+			Assessment assessment;
+			XmlNode assessmentnode = root.CreateElement("assessment");
+			assessmentnode.Attributes.Append(root.CreateAttribute("name"));
+			assessmentnode.Attributes.Append(root.CreateAttribute("mark"));
+			modulenode.AppendChild(assessmentnode);
+
+			assessment = new Assessment(assessmentnode);
+			assessment.setName(name);
+			assessment.setMark(mark);
+
+			return assessment;
+		}
+
+		public void delAssessment(int index)
+		{
+			modulenode.RemoveChild(modulenode.ChildNodes [index]);
+		}
+	}
+}

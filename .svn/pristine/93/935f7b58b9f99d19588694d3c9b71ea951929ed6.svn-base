@@ -1,0 +1,85 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing;
+
+namespace CW2_OOD
+{
+    class AssessmentControlGroup
+    {
+        public Label assessLabel;
+        public Button assessEdit;
+        public Button assessDelete;
+
+        public Panel root;
+        public Module module;
+        public Assessment assessment;
+
+        public int maxweight;
+
+        public FormClosedEventHandler updateFCEH;
+        public EventHandler updateEH;
+
+        public AssessmentControlGroup(FormClosedEventHandler updateFCEH, EventHandler updateEH, Module module, int maxweight, Assessment assessment, Panel root)
+        {
+            this.root = root;
+            this.module = module;
+            this.assessment = assessment;
+            this.maxweight = maxweight;
+
+            this.updateFCEH = updateFCEH;
+            this.updateEH = updateEH;
+
+            assessLabel = new Label();
+            assessEdit = new Button();
+            assessDelete = new Button();
+        }
+
+        public void addControls(Point point, out Point next)
+        {
+            Point curpoint = new Point(point.X, point.Y);
+            assessLabel.Width += 80;
+            assessLabel.Text = assessment.getName() + ", Mark: " + assessment.getMark().ToString() + ", Weight: " + assessment.getWeight().ToString();
+            assessLabel.Location = curpoint;
+            curpoint = new Point(curpoint.X + assessLabel.Width + 20, curpoint.Y);
+
+            assessEdit.Text = "Edit";
+            assessEdit.Location = curpoint;
+            assessEdit.Click += new EventHandler(assessmentEdit_Click);
+            curpoint = new Point(curpoint.X + assessEdit.Width + 20, curpoint.Y);
+
+            assessDelete.Text = "Delete";
+            assessDelete.Location = curpoint;
+            assessDelete.Click += new EventHandler(assessmentDelete_Click);
+            assessDelete.Click += updateEH;
+            curpoint = new Point(curpoint.X + assessDelete.Width + 20, curpoint.Y);
+
+            root.Controls.Add(assessLabel);
+            root.Controls.Add(assessEdit);
+            root.Controls.Add(assessDelete);
+
+            next = new Point(point.X, point.Y + assessEdit.Height);
+        }
+
+        public void removeControls()
+        {
+            root.Controls.Remove(assessLabel);
+            root.Controls.Remove(assessEdit);
+            root.Controls.Remove(assessDelete);
+        }
+
+        public void assessmentEdit_Click(object sender, EventArgs args)
+        {
+            AddAssessment form = new AddAssessment(updateFCEH, module, maxweight, assessment);
+            form.Show();
+        }
+
+        public void assessmentDelete_Click(object sender, EventArgs args)
+        {
+            module.delAssessment(assessment);
+        }
+    }
+}

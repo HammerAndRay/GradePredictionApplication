@@ -1,0 +1,145 @@
+using System;
+using System.Xml;
+
+namespace CW2_OOD
+{
+	public class Module
+	{
+		protected XmlDocument root;
+		protected XmlNode modulenode;
+        protected XmlNode codeattr;
+		protected XmlNode nameattr;
+        protected XmlNode creditattr;
+
+		public Module(XmlDocument root, XmlNode modulenode)
+		{
+			this.root = root;
+			this.modulenode = modulenode;
+            this.codeattr = this.modulenode.Attributes.GetNamedItem("code");
+			this.nameattr = this.modulenode.Attributes.GetNamedItem("name");
+            this.creditattr = this.modulenode.Attributes.GetNamedItem("credit");
+		}
+
+        public XmlNode getNode()
+        {
+            return modulenode;
+        }
+
+        public void setCode(string code)
+        {
+            codeattr.Value = code;
+        }
+
+        public string getCode()
+        {
+            return codeattr.Value;
+        }
+
+		public void setName(string name)
+		{
+			nameattr.Value = name;
+		}
+
+		public string getName()
+		{
+			return nameattr.Value;
+		}
+
+        public void setCredit(int cred)
+        {
+            creditattr.Value = cred.ToString();
+        }
+
+        public int getCredit()
+        {
+            int cred;
+            if (!int.TryParse(creditattr.Value, out cred))
+            {
+                cred = 0;
+            }
+            return cred;
+        }
+
+        public static int sumAssessmentWeight(Assessment[] assessments)
+        {
+            int acc = 0;
+            foreach(Assessment a in assessments)
+            {
+                acc += a.getWeight();
+            }
+
+            return acc;
+        }
+
+        public int sumAssessmentWeight()
+        {
+            return sumAssessmentWeight(getAssessments());
+        }
+
+        public static double score(Assessment[] assessments, out bool failed)
+        {
+            double acc = 0.0;
+            failed = false;
+            foreach (Assessment a in assessments)
+            {
+                if(a.getMark() < 30)
+                {
+                    failed = true;
+                }
+
+                acc += a.score();
+            }
+
+            failed = failed || acc < 40.0;
+            return acc;
+        }
+
+        public double score(out bool failed)
+        {
+            return score(getAssessments(), out failed);
+        }
+
+        public int getAssessmentCount()
+        {
+            return modulenode.ChildNodes.Count;
+        }
+
+		public Assessment[] getAssessments()
+		{
+			int assesscount;
+			Assessment[] assesslist;
+
+			assesscount = modulenode.ChildNodes.Count;
+			assesslist = new Assessment[assesscount];
+
+            for (int i = 0; i < assesscount; i++)
+            {
+                assesslist[i] = new Assessment(modulenode.ChildNodes[i]);
+            }
+            
+            return assesslist;
+		}
+
+		public Assessment addAssessment(string name, int mark, int weight)
+		{
+			Assessment assessment;
+			XmlNode assessmentnode = root.CreateElement("assessment");
+			assessmentnode.Attributes.Append(root.CreateAttribute("name"));
+			assessmentnode.Attributes.Append(root.CreateAttribute("mark"));
+            assessmentnode.Attributes.Append(root.CreateAttribute("weight"));
+			modulenode.AppendChild(assessmentnode);
+
+			assessment = new Assessment(assessmentnode);
+			assessment.setName(name);
+			assessment.setMark(mark);
+            assessment.setWeight(weight);
+
+			return assessment;
+		}
+
+        public void delAssessment(Assessment assessment)
+        {
+            modulenode.RemoveChild(assessment.getNode());
+        }
+	}
+}

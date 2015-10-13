@@ -1,0 +1,85 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing;
+
+namespace CW2_OOD
+{
+    class ModuleControlGroup
+    {
+        public Label modLabel;
+        public Button modAssessments;
+        public Button modEdit;
+        public Button modDelete;
+
+        public Panel root;
+        public Course course;
+        public Level level;
+        public Module module;
+
+        public ModuleControlGroup(Course course, Level level, Module module, Panel root)
+        {
+            this.course = course;
+            this.level = level;
+            this.module = module;
+            this.root = root;
+        }
+
+        public void addControls(Point point, out Point next)
+        {
+            Point curpoint = new Point(point.X, point.Y);
+            modLabel = new Label();
+            modLabel.Width += 280;
+            modLabel.Text = module.getCode() + ": " + module.getName() + ", Credits: " + module.getCredit().ToString();
+            modLabel.Location = curpoint;
+            curpoint = new Point(curpoint.X + modLabel.Width + 20, curpoint.Y);
+
+            modAssessments = new Button();
+            modAssessments.Text = "Assessments";
+            modAssessments.Location = curpoint;
+            curpoint = new Point(curpoint.X + modAssessments.Width + 20, curpoint.Y);
+
+            modEdit = new Button();
+            modEdit.Text = "Edit";
+            modEdit.Location = curpoint;
+            modEdit.Click += new EventHandler(moduleEdit_Click);
+            curpoint = new Point(curpoint.X + modEdit.Width + 20, curpoint.Y);
+
+            modDelete = new Button();
+            modDelete.Text = "Delete";
+            modDelete.Location = curpoint;
+            modDelete.Click += new EventHandler(moduleDelete_Click);
+            curpoint = new Point(curpoint.X + modDelete.Width + 20, curpoint.Y);
+
+            root.Controls.Add(modLabel);
+            root.Controls.Add(modAssessments);
+            root.Controls.Add(modEdit);
+            root.Controls.Add(modDelete);
+
+            next = new Point(point.X, point.Y + modAssessments.Height);
+        }
+
+        public void removeControls()
+        {
+            root.Controls.Remove(modLabel);
+            root.Controls.Remove(modAssessments);
+            root.Controls.Remove(modEdit);
+            root.Controls.Remove(modDelete);
+        }
+
+        public void moduleEdit_Click(object sender, EventArgs args)
+        {
+            AddModule form = new AddModule(course, level, module);
+            //form.FormClosed += new FormClosedEventHandler(level4tab_updateOnClose);
+            form.Show();
+        }
+
+        public void moduleDelete_Click(object sender, EventArgs args)
+        {
+            course.delModule(level, module);
+        }
+    }
+}

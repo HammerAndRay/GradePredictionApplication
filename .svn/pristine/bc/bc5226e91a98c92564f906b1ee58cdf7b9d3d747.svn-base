@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace CW2_OOD
+{
+    public partial class AddCourse : Form
+    {
+        public String CourseName;
+        public AddCourse()
+        {
+            InitializeComponent();
+        }
+
+        private void AddCourseName_Click(object sender, EventArgs e)
+        {
+            CourseName = CourseNameText.Text;
+
+            File.WriteAllText("CourseName.xml", CourseName);
+            Debug.WriteLine(CourseName);
+            this.Close();
+        }
+    }
+}
